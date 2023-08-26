@@ -1,4 +1,4 @@
-## Convex Decomposition
+# Convex Decomposition
 
 
 We use [BSP-Net](https://github.com/czq142857/BSP-NET-pytorch) to conduct category-level part/object convex cosegmentation. 
@@ -8,7 +8,7 @@ The process of partitioning a set of part/object meshes from a same category int
 - [Gathering voxels](#gathering-voxels) (gather a set of `.binvox` into a `.vox` file)
 - Convex partition
 
-### Mesh Voxelization
+## Mesh Voxelization
 
 We use [cuda_voxelizer](https://github.com/Forceflow/cuda_voxelizer) for efficiently converting meshes into voxels (with grid size as 64 in our experimenets). 
 
@@ -25,7 +25,7 @@ CUDA_VISIBLE_DEVICES=${cuda_ids} python src/convex_decomposition/mesh_voxelizati
 where `data_folder` is the path to meshes to process and `voxelizer` is the path to the compiled binary excutable file `cuda_voxelizer`. 
 
 
-### Gathering Voxels
+## Gathering Voxels
 
 
 
