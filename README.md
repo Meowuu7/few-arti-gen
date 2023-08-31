@@ -36,7 +36,7 @@
 See `./docs/n-xxx.md` for per-step instructions. 
 
 **TODOs (More to come, stay tuned!)**
-- [ ] Code for convex deformation and synchronization
+- [ ] Remaining code for convex deformation and synchronization
 - [ ] Data and checkpoitns
 - [ ] More docs
 
