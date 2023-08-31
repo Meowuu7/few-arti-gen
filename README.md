@@ -11,7 +11,10 @@
   </div>
   
   <p align="center">
-    <br>
+    <!-- <br> -->
+    <!-- <br> -->
+      <strong>ICCV 2023</strong>
+      <br>
       <a href="https://meowuu7.github.io/few-arti-obj-gen/">Webpage</a>
       |
       <a href="https://meowuu7.github.io/few-arti-obj-gen/static/pdfs/few-arti-gen.pdf">Paper</a>
@@ -19,8 +22,6 @@
       <a href="https://meowuu7.github.io/few-arti-obj-gen/static/pdfs/few-arti-gen-supp.pdf">Supp</a>
       |
       <a href="https://youtu.be/p8x3GN3VSPE">Video</a>
-      <br>
-      <strong>ICCV 2023</strong>
   </p>
   <!-- <br>
   <div align="center">
