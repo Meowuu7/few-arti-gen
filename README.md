@@ -1,7 +1,7 @@
 <p align="center">
 
   <h1 align="center">Few-Shot Physically-Aware Articulated Mesh Generation via Hierarchical Deformation</h1>
-  <h2 align="center">ICCV 2023</h2>
+  <!-- <h2 align="center">ICCV 2023</h2> -->
   <div align="center">
     <img src="./assets/teaser-2-cropped.gif" alt="Logo" width="100%">
     <!-- <video id="teaser" autoplay muted loop height="100%">
@@ -20,6 +20,8 @@
     .
     <a href="https://youtu.be/p8x3GN3VSPE">Video</a>
   </p>
+  <br>
+  <strong>ICCV 2023</strong>
 </p>
 
 ## Instructions
