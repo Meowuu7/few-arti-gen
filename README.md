@@ -33,7 +33,7 @@
 
 ## Instructions
 
-See `./docs/n-xxx.md` for per-step instructions. 
+See `./docs/n-xxx.md` for `n`-th step's instructions. 
 
 **TODOs (More to come, stay tuned!)**
 - [ ] Remaining code for convex deformation and synchronization
