@@ -2,8 +2,6 @@
 
   <h1 align="center">Few-Shot Physically-Aware Articulated Mesh Generation via Hierarchical Deformation</h1>
   <!-- <h2 align="center">ICCV 2023</h2> -->
-  
-  
   <p align="center">
     <!-- <br> -->
     <!-- <br> -->
