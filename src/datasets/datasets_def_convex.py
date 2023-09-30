@@ -6,7 +6,7 @@ import random
 import utils
 from common_utils import dataset_utils
 
-### collect data from the dataset ###
+
 def my_collate(batch):
     src_pc = []
     src_name = []
@@ -22,16 +22,8 @@ def my_collate(batch):
     real_ver = []
     real_face = []
     w_mesh = []
-    # src_edges = []
-    # src_dofs = []
-    # tar_edges = []
-    # tar_dofs = []
     src_cvx_to_pts = []
     dst_cvx_to_pts = []
-    # "real_pc": real_pc, "real_key_pts": real_key_pts, 
-                # "real_vertices": real_vertices, "real_faces": real_faces, 
-                # "real_w_pc": real_vertices, "real_w_mesh": real_faces, 
-                # "real_cvx_to_pts": real_cvx_to_pts,  ### cvx to pts ...
     real_pc = []
     real_key_pts = []
     real_vertices = []
@@ -78,13 +70,6 @@ def my_collate(batch):
         src_cvx_idx_list.append(data["src_cvx_idx_list"])
         dst_cvx_idx_list.append(data["dst_cvx_idx_list"])
         
-        ### src_edges, src_dofs ###
-        # src_edges.append(torch.from_numpy(data['src_edges']).long().unsqueeze(0).cuda()) #### src_edges
-        # src_dofs.append(torch.from_numpy(data['src_dofs']).float().unsqueeze(0).cuda()) #### vert_dofs 
-        
-        # tar_edges.append(torch.from_numpy(data['tar_edges']).long().unsqueeze(0).cuda()) #### src_edges
-        # tar_dofs.append(torch.from_numpy(data['tar_dofs']).float().unsqueeze(0).cuda()) #### vert_dofs 
-        
         dst_key_pts.append(torch.from_numpy(data["dst_key_pts"]).float().unsqueeze(0).cuda()) ### dst_key-pts
         
         src_cvx_to_pts.append(torch.from_numpy(data["src_cvx_to_pts"]).float().unsqueeze(0).cuda())
@@ -103,18 +88,11 @@ def my_collate(batch):
     real_w_pc = torch.cat(real_w_pc).cuda()
     real_cvx_to_pts = torch.cat(real_cvx_to_pts, dim=0).cuda()
     
-    # real_vertices.append(torch.from_numpy(data["real_vertices"]).float().cuda())
-        # real_faces.append(torch.from_numpy(data["real_faces"]))
-        # real_w_pc.append(torch.from_numpy(data["real_w_pc"]).unsqueeze(0).float())
-        # real_w_mesh.append(torch.from_numpy(data["real_w_mesh"]).float())
-    
     return {"src_pc": src_pc, "src_name": src_name, "key_pts": key_pts,
             "tar_pc": tar_pc, "tar_name": tar_name, "w_pc": w_pc,
             "src_ver": src_ver, "src_face": src_face, "w_mesh": w_mesh,
             "tar_ver": tar_ver, "tar_face": tar_face,
             "real_ver": real_ver, "real_face": real_face,
-            # "src_edges": src_edges, "src_dofs": src_dofs,
-            # "tar_edges": tar_edges, "tar_dofs": tar_dofs, 
             "real_pc": real_pc, 
             "real_key_pts": real_key_pts, 
             "real_w_pc": real_w_pc, 
@@ -128,7 +106,7 @@ def my_collate(batch):
             }
 
 ### dataset def 
-class ChairDataset(torch.utils.data.Dataset):
+class ConvexDataset(torch.utils.data.Dataset):
     def __init__(self, phase="train", data_dir="../data/chair", split=None, opt=None, cvx_to_pts_sufix=None, n_keypoints=None, src_folder_fn=None, dst_folder_fn=None):
         super().__init__()
         # cur_part_cvx_to_pts_sufix
@@ -153,7 +131,6 @@ class ChairDataset(torch.utils.data.Dataset):
           self.dst_data_dir = self.data_dir
         
         
-        ### cvx_to_pts_sufix for the sufxi 
         self.cvx_to_pts_sufix = cvx_to_pts_sufix if cvx_to_pts_sufix is not None else self.opt.cvx_to_pts_sufix 
         
         try:
@@ -191,23 +168,10 @@ class ChairDataset(torch.utils.data.Dataset):
           self.cvx_folder_fn = self.dst_folder_fn 
         
         
-        
         self.split = split
         
         
-        # src_folder = os.path.join(self.data_dir, "src")
-        
-        #### if we can use any shape as the source shape for deformation? ####
-        # if not self.use_paired_data: ### not use paired data...
-        #     src_folder = os.path.join(self.data_dir, "dst")
-        # else:
-        #     src_folder = os.path.join(self.data_dir, "src")
-        
-        # src_folder = os.path.join(self.data_dir, "src")
-        # src_folder = os.path.join(self.data_dir, self.src_folder_fn if os.path.exists(os.path.join(self.data_dir, self.src_folder_fn)) else "src")
-        
         src_folder = os.path.join(self.src_data_dir, self.src_folder_fn if os.path.exists(os.path.join(self.src_data_dir, self.src_folder_fn)) else "src")
-        # dst_folder = os.path.join(self.data_dir, "dst")
         dst_folder = os.path.join(self.dst_data_dir, self.dst_folder_fn if os.path.exists(os.path.join(self.dst_data_dir, self.dst_folder_fn)) else "dst")
         
         print(f"src_data_dir: {self.src_data_dir}, src_folder: {src_folder}")
@@ -216,15 +180,6 @@ class ChairDataset(torch.utils.data.Dataset):
         self.src_folder = src_folder ## src_folder --> 
         self.dst_folder = dst_folder
         
-        ### src_folder ###
-        ### cvx_to_pts ###
-        # self.cvx_to_pts_sufix = opt.cvx_to_pts_sufix
-        
-
-        
-        # with open(os.path.join(self.data_dir, "all.txt")) as f:
-        #     lines = f.readlines()
-        #     self.models = [line.rstrip() for line in lines]
         
         # /data/datasets/genn/ShapeNetCoreV2_Deform/03636649_c_512/dst_def/1a9c1cbf1ca9ca24274623f5a5d0bcdc_manifold_tetra.mesh__sf.keypoints_256.weights.txt
         self.keypts_sufix = f"_manifold_tetra.mesh__sf.keypoints_{self.n_keypoints}.weights.sampled_4096.txt"
@@ -265,54 +220,21 @@ class ChairDataset(torch.utils.data.Dataset):
         ''' src_models ''' 
         
         
-        
-        # if not os.path.exists(os.path.join(self.data_dir, "all.txt")):
-        #   self.models = os.listdir(os.path.join(self.data_dir, self.dst_folder_fn))
-        #   self.models = [fn[: -len(self.keypts_sufix)] for fn in self.models if fn.endswith(self.keypts_sufix)]
-        #   self.models = sorted(self.models)
-        #   # print(f'models: {self.models}')
-        #   self.dst_models = self.models
-        #   self.src_models = self.models
-        # else:
-        #   with open(os.path.join(self.src_folder, "all.txt"), "r") as rf:
-        #     lines = rf.readlines()
-        #     self.src_models = [line.rstrip() for line in lines]
-          
-        #   with open(os.path.join(self.dst_folder, "all.txt"), "r") as rf:
-        #     lines = rf.readlines()
-        #     self.dst_models = [line.rstrip() for line in lines]
-        
-        
         ### surface points, mesh points, cvx points 
         
         print(f"current dst_models: {len(self.dst_models)}, cur src_models: {len(self.src_models)}")
         
         self.n_shots = self.opt.n_shots
         if self.split == "train":
-          # self.src_models = self.src_models[:36]
-          # self.dst_models = self.dst_models[:36]
-          # self.src_models = self.src_models[:5]
-          # self.dst_models = self.dst_models[:5]
           self.src_models = self.src_models[:self.n_shots]
           # self.dst_models = self.dst_models[:self.n_shots]
         else:
-          # self.src_models = self.src_models[36: 36 + 360]
-          # self.dst_models = self.dst_models[36: 36 + 360]
-          
-          # self.src_models = self.src_models[self.n_shots: self.n_shots + 360]
-          # self.dst_models = self.dst_models[self.n_shots: self.n_shots + 360]
-          
-          ## 1000 test samples for rigid objects
           n_ref_samples = 1000 ## n_ref_sampless ### default n_ref_samples ###
           n_ref_samples = min(n_ref_samples, len(self.src_models) - self.n_shots) ### n_shots, n_ref_sampelsxxx ###
           self.src_models = self.src_models[-n_ref_samples: ]
           self.dst_models = self.dst_models[-n_ref_samples: ]
           
-      
         
-        
-        # self.dst_models = [fn for fn in self.dst_models if os.path.exists(os.path.join(self.dst_folder, fn + f"_manifold_tetra.mesh__sf.keypoints_{self.n_keypoints}.weights.sampled_4096.txt"))]
-        # self.src_models = self.dst_models
         
         print(f"Meta-infos loaded with src_models: {len(self.src_models)}, dst_models: {len(self.dst_models)}")
         
@@ -325,34 +247,11 @@ class ChairDataset(torch.utils.data.Dataset):
           self.src_models = self.src_models[:2]
           self.dst_models = self.dst_models[:2]
         
-        # print(f"dst_models: {self.dst_models[:36]}")
-        
-        
-        ##### split models ######
-        # if self.split is not None:
-        #   if self.split == "train":
-        #     tot_n_src_models = int(len(self.src_models) * 0.9)
-        #     self.src_models = self.src_models[: tot_n_src_models]
-        #     self.dst_models = self.dst_models[: tot_n_src_models]
-        #   elif self.split == "test":
-        #     tot_n_src_models = int(len(self.src_models) * 0.9)
-        #     self.src_models = self.src_models[tot_n_src_models: ]
-        #     self.dst_models = self.dst_models[tot_n_src_models: ]
-        #   else:
-        #     raise ValueError(f"Unrecognized split: {self.split}")
-        
-        ### src and jdstsssssssssssssssssssssssssss
-          
         
         
         self.src_n_models = len(self.src_models)
         self.dst_n_models = len(self.dst_models)
-        ### keypoint 256: gt_step_0_subd_0_manifold_tetra.mesh__sf.keypoints_256 
-        ### sampled 4096: gt_step_0_subd_0_manifold_tetra.mesh__sf.sampled_4096
-        ### surface points: gt_step_0_subd_0_manifold_tetra.mesh__sf
-        ### weights sampled 4096 -> 256: gt_step_0_subd_0_manifold_tetra.mesh__sf.keypoints_256.weights.sampled_4096
-        ### weights tot pts -> 256: gt_step_0_subd_0_manifold_tetra.mesh__sf.keypoints_256.weights
-
+        
         ##### source pc, key_pts, mesh_vertices, mesh_faces, w_pc, w_mesh #####
         self.src_pc = [None for _ in range(self.src_n_models)]
         self.src_key_pts = [None for _ in range(self.src_n_models)]
@@ -408,19 +307,6 @@ class ChairDataset(torch.utils.data.Dataset):
         cur_faces = np.array(cur_faces, dtype=np.long) # .long()
         
         
-        # # cur_cvx_to_verts_fn = cur_model + "_cvx_to_verts.npy"
-        # cvx_to_pts_load_fn = os.path.join(rt_folder, cur_cvx_to_verts_fn)
-        # # print(f"cur_cvx_to_verts_fn: {cvx_to_pts_load_fn}")
-        # if not os.path.exists(cvx_to_pts_load_fn):
-        #   cvx_to_pts_load_fn = os.path.join(self.dst_folder, cur_cvx_to_verts_fn)
-        # if not os.path.exists(cvx_to_pts_load_fn):
-        #   if self.cvx_dim > 0:
-        #     cvx_to_pts_load_fn = os.path.join(self.dst_folder, cur_model + f"_manifold_cvx_to_verts_cdim_{self.cvx_dim}.npy")
-        #   else:
-        #     cvx_to_pts_load_fn = os.path.join(self.dst_folder, cur_model + f"_manifold_cvx_to_verts.npy")
-        # if not os.path.exists(cvx_to_pts_load_fn):
-        #   cvx_to_pts_load_fn = os.path.join(os.path.join(self.data_dir, self.cvx_folder_fn), cur_cvx_to_verts_fn)
-          
         # cur_data_dir; self.cvx_folder_fn, cvx_to_verts_fn #### ---> cvx_to_verts_fns ####
         cvx_to_pts_load_fn = os.path.join(os.path.join(cur_data_dir, self.cvx_folder_fn), cur_cvx_to_verts_fn)
         
@@ -441,13 +327,7 @@ class ChairDataset(torch.utils.data.Dataset):
       src_cvx_to_pts_list = []
       dst_cvx_to_pts_list = []
       
-      ### 
-      # if self.only_tar:
-      #   for cvx_idx in dst_cvx_to_pts:
-      #     cur_dst_cvx_pts = dst_cvx_to_pts[cvx_idx]
-      #     src_cvx_to_pts_list.append(np.reshape(cur_dst_cvx_pts, (1, cur_dst_cvx_pts.shape[0], 3)))
-      #     dst_cvx_to_pts_list.append(np.reshape(cur_dst_cvx_pts, (1, cur_dst_cvx_pts.shape[0], 3)))
-      # else:
+      
       tot_src_cvx_idx_list = []
       tot_dst_cvx_idx_list = []
       if cvx_list_filter:
@@ -565,15 +445,6 @@ class ChairDataset(torch.utils.data.Dataset):
     
     
     def __getitem__(self, idx, dst_idx=None):
-        # if self.use_paired_data:
-        #   # idx = idx * self.dst_n_models + idx ### paried data
-        #   src_idx = idx
-        #   dst_idx = idx
-        #   # print(f"src_idx: {src_idx}, dst_idx: {dst_idx}, src_model_fn: {self.src_models[src_idx]}, dst_model_fn: {self.dst_models[dst_idx]}")
-        # else:
-        
-        ### datasets_def
-        
         
         
         def get_info_via_idx(idxx, for_src=False):
@@ -616,7 +487,6 @@ class ChairDataset(torch.utils.data.Dataset):
           dst_idx = 0
 
         # src_idx = 29
-        # dst_idx = src_idx
         
         print(f"src_idx: {src_idx}, dst_idx: {dst_idx}, src_models: { self.src_models[src_idx]}, dst_models: {self.dst_models[dst_idx]}")
         
@@ -632,7 +502,6 @@ class ChairDataset(torch.utils.data.Dataset):
         while not (self.src_w_pc[src_idx].shape[1] == self.src_n_keypoints and self.src_w_pc[src_idx].shape[0] == self.num_sampled_pts):
           src_idx = random.choice(range(len(self.src_pc)))
           if self.src_pc[src_idx] is None:
-            ## pc, key_pts, vertices, or w_pc 
             src_pc, src_key_pts, src_vertices, src_faces, src_w_pc, src_w_mesh, src_cvx_to_pts = self.load_data_from_model_indicator(self.src_folder, self.src_models[src_idx])
             self.src_pc[src_idx] = src_pc
             self.src_key_pts[src_idx] = src_key_pts
@@ -640,7 +509,7 @@ class ChairDataset(torch.utils.data.Dataset):
             self.src_mesh_faces[src_idx] = src_faces
             self.src_w_pc[src_idx] = src_w_pc
             self.src_w_mesh[src_idx] = src_w_mesh
-            self.src_cvx_to_pts[src_idx] = src_cvx_to_pts ## src_cvx_to_pts ##
+            self.src_cvx_to_pts[src_idx] = src_cvx_to_pts
         
         # print(f"src_idx: {src_idx}, dst_idx: {dst_idx}")
         if self.dst_pc[dst_idx] is None: ### is None 
@@ -699,9 +568,7 @@ class ChairDataset(torch.utils.data.Dataset):
                 "real_ver": dst_vertices, "real_face": dst_faces,
                 "key_pts": src_key_pts, ## src_
                 # "w_mesh": src_w_mesh, "w_pc": src_w_pc, 
-                "w_mesh": src_w_mesh, "w_pc": src_w_pc, ## use targets...
-                # "src_edges": src_edges, "src_dofs": src_dofs,
-                # "tar_edges": tar_edges, "tar_dofs": tar_dofs, 
+                "w_mesh": src_w_mesh, "w_pc": src_w_pc, 
                 "dst_key_pts": dst_key_pts, 
                 "src_cvx_to_pts": src_cvx_to_pts_list,
                 "dst_cvx_to_pts": dst_cvx_to_pts_list, 
@@ -712,5 +579,4 @@ class ChairDataset(torch.utils.data.Dataset):
                 "real_cvx_to_pts": real_cvx_to_pts,  ### cvx to pts ...
                 "src_cvx_idx_list": tot_src_cvx_idx_list, 
                 "dst_cvx_idx_list": tot_dst_cvx_idx_list
-                # if not self.only_src_cvx else src_cvx_to_pts_list
                 }

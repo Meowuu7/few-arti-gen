@@ -36,6 +36,13 @@
 
 https://github.com/Meowuu7/few-arti-gen/assets/50799886/96ec73a6-af99-4d0c-9365-c48d184fc33c
 
+## Enviroment
+
+```bash
+conda env create -f environment.yml
+```
+This script will create an environment named `fewartigen`. 
+
 
 ## Instructions
 
@@ -63,3 +70,7 @@ The method consists of four stages:
 ## Contact
 
 Please contact xymeow7@gmail.com if you have any question.
+
+## Reference
+
+Part of the code is taken from [BSP-Net-Pytorch](https://github.com/czq142857/BSP-NET-pytorch), [BAE-Net](https://github.com/czq142857/BAE-NET), [deep_cages](https://github.com/yifita/deep_cage), and [DeepMetaHandles](https://github.com/Colin97/DeepMetaHandles).  We thank authors for their awesome code. 

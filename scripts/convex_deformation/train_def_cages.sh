@@ -1,54 +1,29 @@
 
 export PYTHONPATH=.
 
-# CUDA_VISIBLE_DEVICES=3 python \
-# src/train_target_driven.py --batch_size=4 --epoch=30000 --learning_rate=0.0005 --gpu='0' --env_name='test' --num_basis=256 --display=100 --step_size=100 # --with-discriminator
 
 
-# export NUM_BASIS=1024
-export NUM_BASIS=64 # 16 # 64 ### number of basis here ###
-export NUM_BASIS=16 # 16 # 64 ### number of basis here ###
-# export NUM_BASIS=4 # 16 # 64 ### number of basis here ###
-# export N_KETPOINTS=64
+export NUM_BASIS=64
 export N_KETPOINTS=256
-# export N_KETPOINTS=1024
 export N_NEIGHBORING=128
 
 
 export BATCH_SIZE=1 # 2 # 4
-export KL_WEIGHT=0.0001 # 1.0
-export KL_WEIGHT=0.00001 # 1.0
 export KL_WEIGHT=0.000001 # 1.0
 export TAR_BASIS=0
 # export TAR_BASIS=1
-export PRED_TYPE="basis" ### ["basis", "offset"]
+export PRED_TYPE="basis" 
 
 export SYM_AXIS=1
 # export SYM_AXIS=0
 
 
-export DATA_DIR="/nas/datasets/gen/datasets/DeepMetaHandles/eye_tot_key_64"
-export DATA_DIR="/nas/datasets/gen/datasets/DeepMetaHandles/sampled_eye_tot_key_64"
-# export DATA_DIR="/nas/datasets/gen/datasets/DeepMetaHandles/shapenet_03624134_tot_key_64"
-export DATA_DIR="/share/xueyi/datasets/gen/datasets/ShapeNet_Deform/02691156"
-export DATA_DIR="/share/xueyi/datasets/gen/datasets/Shape2Motion_Deform/eyeglasses/none_motion"
+
 export DATA_DIR="/data/datasets/genn/Shape2Motion_Deform_key_256/eyeglasses/none_motion"
-export DATA_DIR="/data/datasets/genn/Shape2Motion_Deform_key_256/eyeglasses/none_motion"
-# export DATA_DIR="/data/datasets/genn/ShapeNetCoreV2_Deform/03001627_c_512"
-
-# export DATA_DIR="/data/datasets/genn/ShapeNetCoreV2_Deform/04379243"
 
 
-export EXP_FLAG="eye_def_v6_part_"
-# export EXP_FLAG="eye_def_2_basis_8_"
-export EXP_FLAG="eye_def_2_basis_8_sv_dicts_01_"
-export EXP_FLAG="eye_def_2_basis_8_sv_dicts_005_forward2_nb_16_"
+
 export EXP_FLAG="eye_def_2_basis_8_sv_dicts_02_forward2_nb_16_w_dis_loss_"
-# export EXP_FLAG="eye_def_2_basis_8_sv_dicts_005_forward2_nb_16_nkeypts_1024_"
-# export EXP_FLAG="eye_def_2_basis_8_"
-# export EXP_FLAG="tabel_def_basis_8_sv_dicts_01_forward2_nb_16_nkeypts_256_"
-# export EXP_FLAG="lamp_"
-# export EXP_FLAG="table_flow_pc_cond_tar_cond_bbox_cdim_128_fr_tar"
 
 
 export  NET_PATH=""
@@ -1158,28 +1133,24 @@ export src_index=0
 # # export cvx_list_filter="--cvx_list_filter"
 
 
-# Eyeglasses -> link0/0 /data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_2/dst
+# Eyeglasses -> /data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_2/dst
 export def_version="v4"
 export KL_WEIGHT=0.000001 # 1.0
 export LAP_LAMBDA=4.0
 export coef_multiplier=0.2
 export dis_factor=2.5
 export NUM_BASIS=16
-export N_KETPOINTS=64 ### nkeypoin ### 256 keypts ###
-# export DATA_DIR="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_2"
-# export DATA_DIR="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_1"
+export N_KETPOINTS=64
 export DATA_DIR="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_0"
 export PRED_TYPE="basis"
 export use_gt_cages="--use_gt_cages"
 export cd_weight=0.0
 export n_shots=30
-# export EXP_FLAG=eye_link2_gt_cages_${use_gt_cages}_cd_weight_${cd_weight}_shots_${n_shots}_fr_table_
-# # export EXP_FLAG=eye_link1_gt_cages_${use_gt_cages}_cd_weight_${cd_weight}_shots_${n_shots}_fr_self_
 export EXP_FLAG=eye_link0_gt_cages_${use_gt_cages}_cd_weight_${cd_weight}_shots_${n_shots}_fr_self_
 export SRC_FOLDER_FN="dst"
 export DST_FOLDER_FN="dst"
 export CVX_FOLDER_FN="dst"
-export cvx_to_pts_sufix="_cvx_to_verts.npy" ## src_cvx_to_pts...
+export cvx_to_pts_sufix="_cvx_to_verts.npy"
 export src_cvx_to_pts_sufix="_cvx_to_verts.npy"
 export dst_cvx_to_pts_sufix="_cvx_to_cvx_pts_n_512.npy"
 export one_shp=""
@@ -1200,10 +1171,12 @@ export glb_template="/home/xueyi/gen/DeepMetaHandles/data/sphere_template_4.obj"
 #### train_def_cages #####
 export CUDA_ID=0
 export cvx_list_filter=""
+
+
 export src_data_dir="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_2"
 # export src_data_dir="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_1"
-export src_data_dir="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_0"
-export src_data_dir="/share/xueyi/datasets/gen/datasets/Shape2Motion_Deform/eyeglasses/none_motion"
+# export src_data_dir="/data/datasets/genn/SAPIEN_Deform/Eyeglasses/link_0"
+# export src_data_dir="/share/xueyi/datasets/gen/datasets/Shape2Motion_Deform/eyeglasses/none_motion"
 # # export DATA_DIR="/data/datasets/genn/ShapeNetCoreV2_Deform/04379243_c_512"
 # export src_data_dir="/data/datasets/genn/ShapeNetCoreV2_Deform/04379243_c_512"
 export src_n_keypoints=64 ### nkeypoin ### 256 keypts ### 
@@ -1233,13 +1206,17 @@ export src_index=-1
 
 
 
-
+export src_data_dir="/share/xueyi/datasets/gen/datasets/Shape2Motion_Deform/eyeglasses/none_motion"
+export dst_data_dir="/share/xueyi/datasets/gen/datasets/Shape2Motion_Deform/eyeglasses/none_motion"
+export DST_FOLDER_FN="dst"
+export CVX_FOLDER_FN="dst"
+export src_cvx_to_pts_sufix="_manifold_cvx_to_verts.npy"
+export dst_cvx_to_pts_sufix="_manifold_cvx_to_verts.npy"
+export cvx_list_filter="--cvx_list_filter"
+export src_index=-1 ## 
 
 
 export TRAINER=train_def_cages.py
-
-
-
 
 
 export CVX_DIM=128
@@ -1252,7 +1229,6 @@ export RECON_COND="bbox"
 # export NET_PATH=""
 export with_glb=""
 
-# export display=100
 export display=20
 
 export CUDA_ID=0

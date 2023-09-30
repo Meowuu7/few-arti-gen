@@ -1,9 +1,9 @@
-import src.datasets.datasets_def_convex as datasets_convex
+import src.datasets.datasets_def_v5 as datasets_v3
 import torch
 import numpy as np
 import src.networks.network_target_driven_prob as network
 import src.networks.network_with_cages as network_paired_data
-from src.common_utils.utils import normalie_pc_bbox_batched, save_obj_file, weights_init
+from src.common_utils.utils import normalie_pc_bbox_batched, save_obj_file, weights_init, weights_init1
 import argparse
 import shutil
 import logging
@@ -14,8 +14,6 @@ import datetime
 from src.common_utils.evaluation_metrics import *
 import common_utils.data_utils_torch as data_utils
 from src.networks.network import model as glb_deform_model
-import src.common_utils.losses as losses
-
 
 
 
@@ -178,6 +176,7 @@ def parse_args():
 opt = parse_args()
 
 
+
 if "ShapeNet" in opt.data_dir:
     opt.symmetry_axis = 0
 else:
@@ -226,13 +225,7 @@ log_string('PARAMETER ...')
 log_string(opt)
 
 
-##### add exp_flag to the samples dir's name #####
-use_prob_indicator = 1 if opt.use_prob else 0
-use_prob_src_indicator = 1 if opt.use_prob_src else 0
-
-
-
-model_flag = f"{opt.exp_flag}_{opt.learning_rate}_kl_{opt.kl_weight}_use_prob_{use_prob_indicator}_src_prob_{use_prob_src_indicator}_scaling_{opt.random_scaling}_tar_basis_{opt.tar_basis}_num_basis_{opt.num_basis}_n_keypoints_{opt.n_keypoints}_neighbouring_k_{opt.neighbouring_k}"
+model_flag = f"{opt.exp_flag}_{opt.learning_rate}_kl_{opt.kl_weight}_scaling_{opt.random_scaling}_tar_basis_{opt.tar_basis}_num_basis_{opt.num_basis}_n_keypoints_{opt.n_keypoints}_neighbouring_k_{opt.neighbouring_k}"
 
 
 samples_dir = model_flag
@@ -242,36 +235,54 @@ os.makedirs(samples_root_dir, exist_ok=True)
 samples_dir = os.path.join(samples_root_dir, samples_dir)
 os.makedirs(samples_dir, exist_ok=True)
 
-
-
-checkpoints_dir = "./ckpts"
-checkpoints_dir = os.path.join(checkpoints_dir, "few_arti_gen")
-os.makedirs(checkpoints_dir, exist_ok=True)
-
-
-
 data_dir = opt.data_dir
 
 
-dataset_train = datasets_convex.ConvexDataset("train", data_dir, split="train", opt=opt)
+dataset_train = datasets_v3.ChairDataset("train", data_dir, split="train", opt=opt)
 
 #### collect fn #####
-dataloader_train = torch.utils.data.DataLoader(dataset_train, collate_fn=datasets_convex.my_collate, drop_last=True, shuffle=True, batch_size=opt.batch_size, num_workers=opt.num_workers, worker_init_fn=lambda id: np.random.seed(np.random.get_state()[1][0] + id))
+dataloader_train = torch.utils.data.DataLoader(dataset_train, collate_fn=datasets_v3.my_collate, drop_last=True, shuffle=True, batch_size=opt.batch_size, num_workers=opt.num_workers, worker_init_fn=lambda id: np.random.seed(np.random.get_state()[1][0] + id))
 
 
-dataset_test = datasets_convex.ConvexDataset("test", data_dir, split="test", opt=opt)
+dataset_test = datasets_v3.ChairDataset("test", data_dir, split="test", opt=opt)
 
 #### collect fn #####
-dataloader_test = torch.utils.data.DataLoader(dataset_test, collate_fn=datasets_convex.my_collate, drop_last=True, shuffle=False, batch_size=opt.batch_size, num_workers=opt.num_workers, worker_init_fn=lambda id: np.random.seed(np.random.get_state()[1][0] + id))
+dataloader_test = torch.utils.data.DataLoader(dataset_test, collate_fn=datasets_v3.my_collate, drop_last=True, shuffle=False, batch_size=opt.batch_size, num_workers=opt.num_workers, worker_init_fn=lambda id: np.random.seed(np.random.get_state()[1][0] + id))
 
 
 nn_com_pts = 4096
 mesh_sample_npoints = 1
 
+tot_ref_pts = []
 
+if len(opt.ref_pts_path) > 0:
+    tot_ref_pts = np.load(opt.ref_pts_path, allow_pickle=True)
+    tot_ref_pts = torch.from_numpy(tot_ref_pts).float()
+else:
+    ''' Ref pcs '''
+    for tst_idx in range(len(dataset_test)):
+        cur_tst_info_dict = dataset_test.get_objs_info_via_idxess(tst_idx)
+        verts, faces = cur_tst_info_dict["vertices"], cur_tst_info_dict["faces"]
+        faces_list = faces.tolist()
+        sampled_pcts = data_utils.sample_pts_from_mesh(verts, faces_list, npoints=mesh_sample_npoints)
+        print(f"tst_idx: {tst_idx}, ori_nn_sampled_pts: {sampled_pcts.shape}")
+        sampled_pcts = torch.from_numpy(sampled_pcts).float().cuda() ## nn_pts x 3
+        sampled_pcts_fps_idx = data_utils.farthest_point_sampling(sampled_pcts.unsqueeze(0), n_sampling=nn_com_pts) ### nn_pts x 3
+        sampled_pcts = sampled_pcts[sampled_pcts_fps_idx].cpu()
+        tot_ref_pts.append(sampled_pcts.unsqueeze(0))
 
+    tot_ref_pts = torch.cat(tot_ref_pts, dim=0)
+print(f"Reference points: {tot_ref_pts.size()}")
+
+ref_pts_sv_fn = os.path.join(samples_dir, "tot_ref_pts.npy")
+np.save(ref_pts_sv_fn, tot_ref_pts.detach().cpu().numpy())
+
+print(f"Reference pts saved to {ref_pts_sv_fn}...")
+
+## ImageRender
 net = network_paired_data.model(opt.num_basis, opt=opt).cuda()
 
+netD = network.Discriminator().cuda() 
 
 
 image_render = network_paired_data.ImageRender()
@@ -280,7 +291,7 @@ image_render = network_paired_data.ImageRender()
 
 
 
-if opt.with_glb: ### 
+if opt.with_glb: 
     glb_net = glb_deform_model(opt.num_basis, opt=opt).cuda()
 else:
     glb_net = None
@@ -315,29 +326,23 @@ tot_curve = []
 g_curve = []
 d_curve = []
 net = net.apply(weights_init)
+netD = netD.apply(weights_init1)
 
-
-### Load checkpoint ###
+### net_path: net_path --> net_path... ###
 if len(opt.net_path) > 0:
+    ###### net_state_dict xxx ######
     net_state_dict = torch.load(opt.net_path, map_location="cpu", )
     # safe_load_ckpt_common(net, net_state_dict, weight_flag=weight_flag)
     safe_load_ckpt_common(net, net_state_dict) ### laod net path ###
     
 
+
+### net_path: net_path --> net_path... ###
 if len(opt.net_glb_path) > 0:
+    ###### net_state_dict xxx ######
     net_state_dict = torch.load(opt.net_glb_path, map_location="cpu", )
     # safe_load_ckpt_common(net, net_state_dict, weight_flag=weight_flag)
     safe_load_ckpt_common(glb_net, net_state_dict) ### laod net path ###
-
-
-
-optimizer = torch.optim.Adam(
-    net.parameters(),
-    lr=opt.learning_rate,
-    betas=(0.9, 0.999),
-    eps=1e-08,
-    weight_decay=opt.decay_rate)
-
 
 
 
@@ -352,12 +357,16 @@ glb_net = None
 sampled_pts = []
 
 
+epoch = 0
+
 
 if glb_net is not None:
     glb_net.train()
     net.train()
+    netD.train()
 else:
     net.train()
+    netD.train()
 
 
 
@@ -369,167 +378,72 @@ src_names = []
 tar_names = []
 
 
-
-## should have a 
-for epoch in range(start_epoch, opt.epoch):
-    #### for the sample index ####
-
-
-    for i, data in tqdm(enumerate(dataloader_train), total=len(dataloader_train), smoothing=0.9):
-        src_pc = data['src_pc']
-        tar_pc = data['tar_pc']
-        
-        # src_pc = tar_pc
-        key_pts = data['key_pts']
-        
-        dst_key_pts = data['dst_key_pts']
-        # key_pts = dst_key_pts
-        
-        w_mesh = data["w_mesh"]
-        w_pc = data['w_pc']
-        src_verts = data['src_ver']
-        tar_verts = data['tar_ver']
-        src_faces = data['src_face']
-        tar_faces = data['tar_face']
-        src_cvx_to_pts = data['src_cvx_to_pts']
-        dst_cvx_to_pts = data['dst_cvx_to_pts']
-        real_pc = data["real_pc"]
-        real_vertices = data["real_vertices"]
-        real_w_mesh = data["real_w_mesh"]
-        real_cvx_to_pts = data["real_cvx_to_pts"] ### real_cvx_to_pts and others ###
-        
-        ### forward
-        mesh_rt_dict = net.forward7(src_verts[0].unsqueeze(0), tar_verts[0].unsqueeze(0), key_pts, dst_key_pts, w_pc,  src_verts,src_cvx_to_pts , tar_verts, dst_cvx_to_pts)
-        rt_dict = mesh_rt_dict
-        
-        tot_bsz_assembled_def_cvx_pts = mesh_rt_dict["tot_bsz_assembled_def_cvx_pts"]
-        
-        cd_loss, mesh_cd_loss = rt_dict["cd_loss"], mesh_rt_dict["cd_loss"]
-        loss = (cd_loss + mesh_cd_loss) / 2.
-        
-        
-        buf["cd"].append(loss.detach().cpu().numpy())
-        
-        
-        
-        tot_basis, tot_coefs = rt_dict["tot_cage_basis"], rt_dict["tot_cage_coefs"]
-        tot_basis_mesh, tot_coefs_mesh = mesh_rt_dict["tot_cage_basis"], mesh_rt_dict["tot_cage_coefs"]
-        
-        tot_ortho_loss, tot_svd_loss, tot_sp_loss = losses.basis_reg_losses(tot_basis, tot_coefs)
-        mesh_tot_ortho_loss, mesh_tot_svd_loss, mesh_tot_sp_loss = losses.basis_reg_losses(tot_basis_mesh, tot_coefs_mesh)
-        
-        tot_ortho_loss = (tot_ortho_loss + mesh_tot_ortho_loss) / 2.
-        tot_svd_loss = (tot_svd_loss + mesh_tot_svd_loss) / 2.
-        tot_sp_loss = (tot_sp_loss + mesh_tot_sp_loss) / 2.
-        
-        
-        # train_def_cages
-        if opt.with_dis_loss:  
-            disent_loss =  tot_ortho_loss * 0.0001 +  tot_sp_loss * 0.0001 
-        else:
-            disent_loss = torch.zeros((1, ), dtype=torch.float32).cuda().mean()
-            
-        # tot_loss = loss + extents_loss * opt.gravity_weight + offset_loss + disent_loss
-        tot_loss = loss * opt.cd_weight + disent_loss
-        buf["tot"].append(tot_loss.detach().cpu().numpy())
-        buf["orth"].append(tot_ortho_loss.detach().cpu().numpy())
-        buf["sp"].append(tot_sp_loss.detach().cpu().numpy())
-        buf["svd"].append(tot_svd_loss.detach().cpu().numpy())
-        
-        optimizer.zero_grad()
-        tot_loss.backward()
-        optimizer.step()
+if len(opt.gen_pts_path) > 0: ## directly loaded from the generated points path
+    ### Need to use the deformation process to generate samples, save them to the save_path, and use the script for evaluation
+    sampled_pts = np.load(opt.gen_pts_path, allow_pickle=True)
+    sampled_pts = torch.from_numpy(sampled_pts).float()
+    print(f'Loaded from {opt.gen_pts_path} with shape: {sampled_pts.size()}')
+elif opt.use_train_pcs: ## compared with the training dataset
+    for tst_idx in range(len(dataset_train)):
+        cur_tst_info_dict = dataset_train.get_objs_info_via_idxess(tst_idx)
+        verts, faces = cur_tst_info_dict["vertices"], cur_tst_info_dict["faces"]
+        faces_list = faces.tolist()
+        sampled_pcts = data_utils.sample_pts_from_mesh(verts, faces_list, npoints=mesh_sample_npoints)
+        print(f"train_idx: {tst_idx}, ori_nn_sampled_pts: {sampled_pcts.shape}")
+        sampled_pcts = torch.from_numpy(sampled_pcts).float().cuda() ## nn_pts x 3
+        sampled_pcts_fps_idx = data_utils.farthest_point_sampling(sampled_pcts.unsqueeze(0), n_sampling=nn_com_pts) ### nn_pts x 3
+        sampled_pcts = sampled_pcts[sampled_pcts_fps_idx].cpu()
+        sampled_pts += [sampled_pcts.unsqueeze(0) for _ in range(12)]
+    sampled_pts = torch.cat(sampled_pts, dim=0)
+    print(f"Sampled_pts: {sampled_pts.size()}")
 
 
-        if epoch % opt.display == 0:
-            ### save cages and deformed cages ###
-            cages = rt_dict["cage"]
-            new_cages = rt_dict["new_cage"]
-            cage_faces = rt_dict["cage_face"]
-            rnd_new_cages = rt_dict["rnd_new_cage"]
-            
-            tot_rnd_def_pcs = mesh_rt_dict["tot_rnd_tot_def_pcs"]
-            
-            
-            for i_bsz in range(len(cages)):
-                for i_cvx in range(len(cages[0])):
-                    cur_cvx_cage = cages[i_bsz][i_cvx]
-                    cur_cvx_new_cage = new_cages[i_bsz][i_cvx]
-                    cur_cvx_cage_faces = cage_faces[i_bsz][i_cvx]
-                    cur_cvx_rnd_new_cagee = rnd_new_cages[i_bsz][i_cvx]
-                    
-            
-                    cages_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_cvx_{i_cvx}_cages.obj")
-                    save_obj_file(cur_cvx_cage.detach().cpu().numpy()[0], cur_cvx_cage_faces.detach().cpu().numpy()[0].tolist(), cages_sv_fn, add_one=True)
-        
-                    def_cages_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_cvx_{i_cvx}_def_cages.obj")
-                    save_obj_file(cur_cvx_new_cage.detach().cpu().numpy()[0], cur_cvx_cage_faces.detach().cpu().numpy()[0].tolist(), def_cages_sv_fn, add_one=True)
-                    
-                    rnd_def_cages_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_cvx_{i_cvx}_rnd_def_cages.obj")
-                    save_obj_file(cur_cvx_rnd_new_cagee.detach().cpu().numpy()[0], cur_cvx_cage_faces.detach().cpu().numpy()[0].tolist(), rnd_def_cages_sv_fn, add_one=True)
-        
-                cur_bsz_src_verts = src_verts[i_bsz].detach().cpu().numpy()
-                cur_bsz_src_face = src_faces[i_bsz].detach().cpu().numpy().tolist()
-                cur_bsz_src_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_src_mesh.obj")
-                save_obj_file(cur_bsz_src_verts, cur_bsz_src_face, cur_bsz_src_mesh_sv_fn, add_one=True)
-                
-                cur_bsz_tar_verts = tar_verts[i_bsz].detach().cpu().numpy()
-                cur_bsz_tar_face = tar_faces[i_bsz].detach().cpu().numpy().tolist()
-                cur_bsz_tar_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_tar_mesh.obj")
-                save_obj_file(cur_bsz_tar_verts, cur_bsz_tar_face, cur_bsz_tar_mesh_sv_fn, add_one=True)
-                
-                def_verts = mesh_rt_dict["deformed"]
-                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_def_mesh.obj")
-                save_obj_file(def_verts.detach().cpu().numpy()[i_bsz], src_faces[0].detach().cpu().numpy().tolist(), def_mesh_sv_fn, add_one=True)
-                
-                
-                merged_def_verts = mesh_rt_dict["merged_deformed"]
-                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_merged_def_mesh.obj")
-                save_obj_file(merged_def_verts.detach().cpu().numpy()[i_bsz], src_faces[0].detach().cpu().numpy().tolist(), def_mesh_sv_fn, add_one=True)
-                
-                
-                s_verts = merged_def_verts.detach().cpu().numpy()[i_bsz]
-                s_faces = src_faces[0].detach().cpu().numpy().tolist()
-                
-                s_sampled_pts = data_utils.sample_pts_from_mesh(s_verts, s_faces, npoints=mesh_sample_npoints, minus_one=False)
-                s_sampled_pts = data_utils.fps_fr_numpy(s_sampled_pts, n_sampling=nn_com_pts)
-                sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                
-                pure_merged_def_verts = mesh_rt_dict["pure_merged_deformed"]
-                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_src_merged_def_mesh.obj")
-                save_obj_file(pure_merged_def_verts.detach().cpu().numpy()[i_bsz], src_faces[0].detach().cpu().numpy().tolist(), def_mesh_sv_fn, add_one=True)
-                
-                s_verts = pure_merged_def_verts.detach().cpu().numpy()[i_bsz]
-                s_faces = src_faces[0].detach().cpu().numpy().tolist()
-                
-                s_sampled_pts = data_utils.sample_pts_from_mesh(s_verts, s_faces, npoints=mesh_sample_npoints, minus_one=False)
-                s_sampled_pts = data_utils.fps_fr_numpy(s_sampled_pts, n_sampling=nn_com_pts)
-                sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                
 
-            print(f"Svaing to : {def_mesh_sv_fn}")
+sampled_pts_sv_fn = os.path.join(samples_dir, "tot_sampled_pts.npy")
+np.save(sampled_pts_sv_fn, sampled_pts.detach().cpu().numpy())
 
-            #### log all losses ####
-            log_string(" tot %f, cd %f, orth %f, svd %f, sp %f" %
-                (
-                np.mean(buf['tot']), np.mean(buf["cd"]), np.mean(buf["orth"]), np.mean(buf["svd"]), np.mean(buf["sp"]))
-                )
-        
-    ckpt_dir = os.path.join(str(checkpoints_dir), model_flag)
-    os.makedirs(ckpt_dir, exist_ok=True)
+print(f"Sampled pts saved to {sampled_pts_sv_fn}...")
+
+
+ref_pcs = tot_ref_pts.cuda()
+gen_pcs = sampled_pts.cuda()
+
+
+
+
+gen_pcs = normalie_pc_bbox_batched(gen_pcs)
+ref_pcs = normalie_pc_bbox_batched(ref_pcs)
+
+
+def normalize_batched_unit_cube(pc):
+    shift = torch.mean(pc, dim=1, keepdim=True)
+    scale = torch.std(pc.contiguous().view(pc.size(0), -1), dim=-1).unsqueeze(-1).unsqueeze(-1)
+    pc = (pc - shift) / scale
+    return pc
+
+# Compute metrics
+results = {}
+with torch.no_grad():
+    # No normalization
+    normed_gen_pcs = gen_pcs
+    normed_ref_pcs = ref_pcs
     
-    if epoch % opt.sv_ckpt_freq == 0:
-        ###### save current model ######
-        net_sv_fn = os.path.join(ckpt_dir, f"net_{epoch}.pth")
-        net_params = net.state_dict()
-        torch.save(net_params, net_sv_fn)
-        
-        print(f"Saveing net's parameters to {net_sv_fn}...")
-        
-    ###### save network model at the last epoch #####
-    last_ep_net_sv_fn = os.path.join(ckpt_dir, f"net_last_model.pth")
-    net_params = net.state_dict()
-    torch.save(net_params, last_ep_net_sv_fn)
+    # results = compute_all_metrics(normed_gen_pcs.cpu(), normed_ref_pcs.cpu(), args.batch_size)
+    results = compute_all_metrics(normed_gen_pcs, normed_ref_pcs, opt.batch_size)
+    results = {k:v.item() for k, v in results.items()}
     
+    for k, v in results.items():
+        logger.info('%s: %.12f' % (k, v))
+    
+    normed_gen_pcs = normalize_batched_unit_cube(gen_pcs)
+    normed_ref_pcs = normalize_batched_unit_cube(ref_pcs)
+    normed_gen_pcs = normalize_batched_unit_cube(normed_gen_pcs)
+    normed_ref_pcs = normalize_batched_unit_cube(normed_ref_pcs)
+    
+    jsd = jsd_between_point_cloud_sets(normed_gen_pcs.cpu().numpy(), normed_ref_pcs.cpu().numpy())
+    results['jsd'] = jsd
+
+for k, v in results.items():
+    logger.info('%s: %.12f' % (k, v))
+
+
