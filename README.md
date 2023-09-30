@@ -18,10 +18,12 @@
 
   <div align="center">
     <!-- <img src="./assets/teaser-2-cropped.gif" alt="Logo" width="100%"> -->
-    <video id="teaser" autoplay muted loop width="100%">
+    <!-- <video id="teaser" autoplay muted loop width="100%">
       <source src="./assets/res-demo.mp4"
               type="video/mp4">
-    </video>
+    </video> -->
+    <video src="./assets/res-demo.mp4" autoplay muted loop width="100%"></video>
+    
   </div>
   <!-- <br>
   <div align="center">
