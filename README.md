@@ -22,7 +22,7 @@
       <source src="./assets/res-demo.mp4"
               type="video/mp4">
     </video> -->
-    <video src="./assets/res-demo.mp4" autoplay muted loop width="100%"></video>
+    <video src="./assets/res-demo.mp4" width="100%"></video>
     
   </div>
   <!-- <br>
