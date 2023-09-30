@@ -32,7 +32,7 @@
 ## Instructions
 
 The method consists of four stages:
-- **Convex decomposition**: a pre-processing stage. Please refer to `[./docs/1-convex_decomposition.md](./docs/1-convex_decomposition.md)` for details. 
+- **Convex decomposition**: a pre-processing stage. Please refer to [`doc_convex_decomposition`](./docs/1-convex_decomposition.md)` for details. 
 - **Convex deformation**: learning the convex deformation module. Please refer to `./docs/2-convex_deformation.md` for details. 
 - **Deformation synchronization**: synchronizing convex deformations for object-level dformations. Please refer to `./docs/3-deformation_synchronization.md` for details. 
 - **Physics-aware correction**: deformation correction considering the physical validity of the generated articulated object. Please refer to `./docs/4-physics_correction.md` for details. 
