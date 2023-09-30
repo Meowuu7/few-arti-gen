@@ -33,7 +33,7 @@
 <!-- <video src="./assets/res-demo.mp4" width="100%"></video>
 ![video](./assets/res-demo.mp4) -->
 
-https://github.com/Meowuu7/few-arti-gen/blob/main/assets/res-demo.mp4
+https://github.com/Meowuu7/few-arti-gen/assets/res-demo.mp4
 
 ## Instructions
 
