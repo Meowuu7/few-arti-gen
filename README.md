@@ -33,14 +33,16 @@
 <!-- <video src="./assets/res-demo.mp4" width="100%"></video>
 ![video](./assets/res-demo.mp4) -->
 
-https://github.com/Meowuu7/few-arti-gen/assets/res-demo.mp4
+
+https://github.com/Meowuu7/few-arti-gen/assets/50799886/96ec73a6-af99-4d0c-9365-c48d184fc33c
+
 
 ## Instructions
 
 The method consists of four stages:
 - **Convex decomposition**: a pre-processing stage. Please refer to [`doc_convex_decomposition`](./docs/1-convex_decomposition.md) for details. 
 - **Convex deformation**: learning the convex deformation module. Please refer to [`doc_convex_deformation`](./docs/2-convex_deformation.md) for details. 
-- **Deformation synchronization**: synchronizing convex deformations for object-level dformations. Please refer to [`doc_deformation_synchronization`](./docs/3-deformation_synchronization.md) for details. 
+- **Deformation synchronization**: synchronizing convex deformations for object-level deformations. Please refer to [`doc_deformation_synchronization`](./docs/3-deformation_synchronization.md) for details. 
 - **Physics-aware correction**: deformation correction considering the physical validity of the generated articulated object. Please refer to [`doc_physics_correction`](./docs/4-physics_correction.md) for details. 
 
 **TODOs (More to come, stay tuned!)**
