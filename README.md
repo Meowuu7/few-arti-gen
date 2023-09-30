@@ -17,7 +17,7 @@
   </p>
 
   <div align="center">
-    <img src="./assets/teaser-2-cropped.gif" alt="Logo" width="100%">
+    <!-- <img src="./assets/teaser-2-cropped.gif" alt="Logo" width="100%"> -->
     <!-- <video id="teaser" autoplay muted loop width="100%">
       <source src="./assets/res-demo.mp4"
               type="video/mp4">
@@ -32,6 +32,8 @@
 </p>
 <!-- <video src="./assets/res-demo.mp4" width="100%"></video>
 ![video](./assets/res-demo.mp4) -->
+
+https://github.com/Meowuu7/few-arti-gen/blob/main/assets/res-demo.mp4
 
 ## Instructions
 
