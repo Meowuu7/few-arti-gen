@@ -30,13 +30,6 @@ import datetime
 
 from src.common_utils.losses import chamfer_distance_raw as chamfer_distance
 
-# from shape_as_points.src.utils import load_config, initialize_logger, \
-# AverageMeter, load_model_manual
-
-# from shape_as_points.src.model import Encode2Points
-# from shape_as_points.src.training import Trainer
-# from shape_as_points.src.
-## 
 
 import src.common_utils.data_utils_torch as data_utils
 

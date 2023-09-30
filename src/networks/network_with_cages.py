@@ -393,6 +393,7 @@ class model(nn.Module):
     # def get_pts_idx_from_indicator(self, pc_cvx_indicator): 
     #   ### bsz x nn_pts x 
     
+    ### 
     ### base pc cv indicators ###
     ### basis and coefficients for mesh deformation ###
     def forward(self, src_pc, tar_pc, key_pts, dst_key_pts, w_pc,  src_verts, src_convex_pts, tar_verts, dst_convex_pts):
@@ -3055,6 +3056,8 @@ class model(nn.Module):
             # n_bsz = cur_bsz_cage_coefs[0].size(0) # number of batch #
             n_cvx = len(cur_bsz_cage_coefs)
             
+            ### cur_bsz_cage_coefs, cur_bsz_cage_basis ###
+            
             # 
             # print(f"nn_cvx: {nn_cvx}, n_cvx: {n_cvx}")
             sorted_coefs = []
@@ -3068,7 +3071,7 @@ class model(nn.Module):
 
             cat_cur_bsz_cage_coefs_argsort = [cur_sort.unsqueeze(1) for cur_sort in cur_bsz_cage_coefs_argsort]
             if len(cat_cur_bsz_cage_coefs_argsort) > 0:
-                cat_cur_bsz_cage_coefs_argsort = torch.cat(cat_cur_bsz_cage_coefs_argsort, dim=1) # bsz x nn_cvx x nn_basis ##
+                cat_cur_bsz_cage_coefs_argsort = torch.cat(cat_cur_bsz_cage_coefs_argsort, dim=1)
             else:
                 cat_cur_bsz_cage_coefs_argsort = torch.arange(self.num_basis, dtype=torch.long).unsqueeze(0).unsqueeze(0).repeat(1, n_cvx, 1).contiguous()
             tot_cat_cur_bsz_cage_coefs_argsort.append(cat_cur_bsz_cage_coefs_argsort)
