@@ -30,6 +30,8 @@
   </div>
   <strong>ICCV 2023</strong> -->
 </p>
+<video src="./assets/res-demo.mp4" width="100%"></video>
+![video](./assets/res-demo.mp4)
 
 ## Instructions
 
