@@ -7,7 +7,7 @@
     <!-- <br> -->
       <strong>ICCV 2023</strong>
       <br>
-      <a href="https://meowuu7.github.io/few-arti-obj-gen/">Webpage</a>
+      <a href="https://meowuu7.github.io/few-arti-obj-gen/">Project page</a>
       |
       <a href="https://meowuu7.github.io/few-arti-obj-gen/static/pdfs/few-arti-gen.pdf">Paper</a>
       |
@@ -17,11 +17,11 @@
   </p>
 
   <div align="center">
-    <img src="./assets/teaser-2-cropped.gif" alt="Logo" width="100%">
-    <!-- <video id="teaser" autoplay muted loop height="100%">
-      <source src="./assets/teaser-2-cropped.mp4"
+    <!-- <img src="./assets/teaser-2-cropped.gif" alt="Logo" width="100%"> -->
+    <video id="teaser" autoplay muted loop width="100%">
+      <source src="./assets/res-demo.mp4"
               type="video/mp4">
-    </video> -->
+    </video>
   </div>
   <!-- <br>
   <div align="center">
