@@ -24,7 +24,7 @@ For instance, run the script
 ```bash
 bash scripts/convex_deformation/train_def_cages_eyeglasses_1.sh
 ```
-to train on the `none_motion` part of the eyeglasses category from the `PartMobility` dataset. 
+to train on the `none_motion` part of the eyeglasses category from the `Shape2Motion` dataset. 
 
 
 

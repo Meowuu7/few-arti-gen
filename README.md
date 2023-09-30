@@ -43,9 +43,11 @@ conda env create -f environment.yml
 ```
 This script will create an environment named `fewartigen`. 
 
+## Data
+Please refer to [`doc_data`](./docs/data.md) for datasets and pre-processed data-related information. 
+
 
 ## Instructions
-
 The method consists of four stages:
 - **Convex decomposition**: a pre-processing stage. Please refer to [`doc_convex_decomposition`](./docs/1-convex_decomposition.md) for details. 
 - **Convex deformation**: learning the convex deformation module. Please refer to [`doc_convex_deformation`](./docs/2-convex_deformation.md) for details. 
