@@ -695,7 +695,7 @@ class BSP_AE(object):
 
 
 	#output bsp shape as obj with color
-	def test_mesh_obj_material(self, config): ### mesh_obj_material...
+	def test_mesh_obj_material(self, config):
 		#load previous checkpoint
 		if not self.load(): exit(-1)
 		

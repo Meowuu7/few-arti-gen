@@ -71,8 +71,8 @@ The method consists of four stages:
 
 ## Contact
 
-Please contact xymeow7@gmail.com if you have any question.
+Please contact xymeow7@gmail.com if you have any questions.
 
 ## Reference
 
-Part of the code is taken from [BSP-Net-Pytorch](https://github.com/czq142857/BSP-NET-pytorch), [BAE-Net](https://github.com/czq142857/BAE-NET), [deep_cages](https://github.com/yifita/deep_cage), and [DeepMetaHandles](https://github.com/Colin97/DeepMetaHandles).  We thank authors for their awesome code. 
+Part of the code is taken from [BSP-Net-Pytorch](https://github.com/czq142857/BSP-NET-pytorch), [BAE-Net](https://github.com/czq142857/BAE-NET), [deep_cages](https://github.com/yifita/deep_cage), and [DeepMetaHandles](https://github.com/Colin97/DeepMetaHandles).  We thank the authors for their awesome code. 
