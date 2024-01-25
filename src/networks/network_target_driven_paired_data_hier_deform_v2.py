@@ -1,4 +1,4 @@
-from multiprocessing.sharedctypes import Value
+# from multiprocessing.sharedctypes import Value
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
@@ -6,7 +6,7 @@ from pointnet_utils import pointnet_encoder
 # from losses import chamfer_distance
 from losses import chamfer_distance_raw as chamfer_distance
 import utils
-from pointnet2 import PointnetPP
+# from pointnet2 import PointnetPP
 import edge_propagation
 
 from common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
@@ -57,9 +57,10 @@ class deform_model(nn.Module):
         self.n_samples = opt.n_samples
         self.symmetry_axis = opt.symmetry_axis ### symmetry_axis ###
         
-        print(f"Using symmetry_axis: {self.symmetry_axis}")
+        # print(f"Using symmetry_axis: {self.symmetry_axis}")
         
-        print(f"prediction type: {self.pred_type}")
+        # print(f"prediction type: {self.pred_type}")
+        
         self.use_pointnet2 = self.opt.use_pointnet2
         # print(f"whether to use pointnet2: {self.use_pointnet2}")
         self.use_graphconv = self.opt.use_graphconv
@@ -68,7 +69,7 @@ class deform_model(nn.Module):
         #### pp_tar_out_feat ####
         self.use_pp_tar_out_feat = self.opt.use_pp_tar_out_feat
         
-        print(f"whether to use pp_tar_out_feat: {self.use_pp_tar_out_feat}")
+        # print(f"whether to use pp_tar_out_feat: {self.use_pp_tar_out_feat}")
         
         if not self.use_graphconv:
             if self.use_pointnet2:

@@ -1,6 +1,6 @@
 from __future__ import print_function
-import warnings
-from pprint import pprint
+
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -8,22 +8,12 @@ import torch.nn.functional as F
 import torch.nn.parallel
 import torch.utils.data
 
-from common_utils.data_utils_torch import farthest_point_sampling
+from src.common_utils.data_utils_torch import farthest_point_sampling
 
-from pointnet_utils import pointnet_encoder, PointFlowEncoder
-# from pytorch_points.misc import logger
-# from pytorch_points.network.layers import Conv1d, Linear
-# from pytorch_points.network.pointnet2_modules import PointnetSAModuleMSG
-# from pytorch_points.network.model_loss import (ChamferLoss, MeshLaplacianLoss,
-#                                                PointEdgeLengthLoss,
-#                                                PointLaplacianLoss, PointStretchLoss,
-#                                                nndistance)
-# from pytorch_points.network.geo_operations import (mean_value_coordinates,
-#                                                    mean_value_coordinates_3D,
-#                                                    normalize_point_batch_to_sphere)
-# from pytorch_points.network.operations import faiss_knn
+from src.networks.pointnet_utils import pointnet_encoder, PointFlowEncoder
+from scipy.optimize import linear_sum_assignment
 
-# from common import deform_with_MVC
+
 
 class STN(nn.Module):
     def __init__(self, num_points = 2500, dim=3):
@@ -32,7 +22,6 @@ class STN(nn.Module):
         self.conv1 = torch.nn.Conv1d(dim, 64, 1)
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
         self.conv3 = torch.nn.Conv1d(128, 1024, 1)
-        #self.mp1 = torch.nn.MaxPool1d(num_points)
         self.fc1 = nn.Linear(1024, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, dim*dim)
@@ -43,10 +32,9 @@ class STN(nn.Module):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
-        #x = self.mp1(x)
-        #print(x.size())
+
         x,_ = torch.max(x, 2)
-        #print(x.size())
+
         x = x.view(-1, 1024)
 
         x = F.relu(self.fc1(x))
@@ -483,7 +471,6 @@ def deform_with_MVC(cage, cage_deformed, cage_face, query, weights=None, verbose
     return deformed
 
 
-from scipy.optimize import linear_sum_assignment
 
 def biparti_matching_batched_torch(pc1_th, pc2_th):
   
@@ -1092,6 +1079,7 @@ class NetworkFull(nn.Module):
 
 
 if __name__ == "__main__":
+    # /home/xueyi/gen/few-arti-gen/src/networks/neuralcages_networks.py
     npoint = 5000
     # net = NetworkFull(dim=3, num_points=npoint, nc_bottleneck=512, nd_bottleneck=512,
     #                 C_residual=True, D_residual=True, D_use_enc_code=True, MLP=False,
@@ -1099,9 +1087,9 @@ if __name__ == "__main__":
     # net = NetworkSharedEnc(dim=3, num_points=npoint, bottleneck_size=512,
     #                        C_residual=True, D_resiual=True, D_use_enc_code=True, template=None, normalization=None,
     #                        concat_prim=True, multi_fold=True)
-    net = UNetwork(dim=3, num_points=npoint, bottleneck_size=512,
-                   C_residual=True, D_residual=True, D_use_enc_code=True, template=None, normalization=None,
-                   concat_prim=False, multi_fold=False)
-    print(net)
-    # points = torch.rand((4, 3, npoint)).cuda()
-    # cage_V = torch.rand((4, 3, 120)).cuda()
+    print("heyhey")
+    # net = UNetwork(dim=3, num_points=npoint, bottleneck_size=512,
+    #                C_residual=True, D_residual=True, D_use_enc_code=True, template=None, normalization=None,
+    #                concat_prim=False, multi_fold=False)
+    # print(net)
+

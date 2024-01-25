@@ -370,11 +370,10 @@ tar_names = []
 
 
 
-## should have a 
+
+
 for epoch in range(start_epoch, opt.epoch):
     #### for the sample index ####
-
-
     for i, data in tqdm(enumerate(dataloader_train), total=len(dataloader_train), smoothing=0.9):
         src_pc = data['src_pc']
         tar_pc = data['tar_pc']
@@ -494,7 +493,7 @@ for epoch in range(start_epoch, opt.epoch):
                 s_sampled_pts = data_utils.sample_pts_from_mesh(s_verts, s_faces, npoints=mesh_sample_npoints, minus_one=False)
                 s_sampled_pts = data_utils.fps_fr_numpy(s_sampled_pts, n_sampling=nn_com_pts)
                 sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
+                # cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
                 
                 pure_merged_def_verts = mesh_rt_dict["pure_merged_deformed"]
                 def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_src_merged_def_mesh.obj")
@@ -506,7 +505,7 @@ for epoch in range(start_epoch, opt.epoch):
                 s_sampled_pts = data_utils.sample_pts_from_mesh(s_verts, s_faces, npoints=mesh_sample_npoints, minus_one=False)
                 s_sampled_pts = data_utils.fps_fr_numpy(s_sampled_pts, n_sampling=nn_com_pts)
                 sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
+                # cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
                 
 
             print(f"Svaing to : {def_mesh_sv_fn}")

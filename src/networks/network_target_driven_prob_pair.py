@@ -1,19 +1,21 @@
 import math
-from multiprocessing.sharedctypes import Value
+# from multiprocessing.sharedctypes import Value
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from pointnet_utils import pointnet_encoder
-from losses import chamfer_distance
-import utils
-from pointnet2 import PointnetPP
-import edge_propagation
-
-from common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
-import model_utils
 
 
-class Discriminator(nn.Module): ### 
+from src.networks.pointnet_utils import pointnet_encoder
+from src.common_utils.losses import chamfer_distance
+import src.common_utils.utils as utils
+from src.networks.pointnet2 import PointnetPP
+import src.networks.edge_propagation as edge_propagation
+
+from src.common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
+import src.common_utils.model_utils as model_utils
+
+
+class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.conv1 = nn.Conv2d(4, 32, 4, 2, 1, bias=False)

@@ -1,29 +1,32 @@
 from multiprocessing.sharedctypes import Value
-from platform import java_ver
+# from platform import java_ver
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from pointnet_utils import pointnet_encoder, PointFlowEncoder
-# from losses import chamfer_distance
-from losses import chamfer_distance_raw as chamfer_distance
-import utils
-from pointnet2 import PointnetPP
-import edge_propagation
 
-from common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
-from common_utils.data_utils_torch import compute_normals_o3d, get_vals_via_nearest_neighbours
-from scipy.optimize import linear_sum_assignment
+
+from src.networks.pointnet_utils import pointnet_encoder
+from src.common_utils.losses import chamfer_distance
+import src.common_utils.utils as utils
+from src.networks.pointnet2 import PointnetPP
+import src.networks.edge_propagation as edge_propagation
+
+from src.common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
+import src.common_utils.model_utils as model_utils
+
+
+# from scipy.optimize import linear_sum_assignment
 import numpy as np
 
 # from diffusion_model import GaussianVAE
 
-from vae_gaussian_ori import GaussianVAE
+# from vae_gaussian_ori import GaussianVAE
 
-from PointFlow.models.networks import PointFlow
-from PointFlow.args import get_args
-from pvcnn.modules.pvconv import PVConv
+# from PointFlow.models.networks import PointFlow
+# from PointFlow.args import get_args
+# from pvcnn.modules.pvconv import PVConv
 
-from network import model as glb_deform_model
+# from network import model as glb_deform_model
 
 
 ### 

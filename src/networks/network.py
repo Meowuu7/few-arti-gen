@@ -1,9 +1,9 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from pointnet_utils import pointnet_encoder
-# from losses import chamfer_distance
-from losses import chamfer_distance_raw as chamfer_distance
+from src.networks.pointnet_utils import pointnet_encoder
+from src.common_utils.losses import chamfer_distance_raw as chamfer_distance
+
 
 class Discriminator(nn.Module):
     def __init__(self):

@@ -2,16 +2,25 @@ from multiprocessing.sharedctypes import Value
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from pointnet_utils import pointnet_encoder
-# from losses import chamfer_distance
-from losses import chamfer_distance_raw as chamfer_distance
-import utils
-from pointnet2 import PointnetPP
-import edge_propagation
 
-from common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
-from common_utils.data_utils_torch import compute_normals_o3d, get_vals_via_nearest_neighbours
+
+
+from torch import autograd
+
+from src.networks.pointnet_utils import pointnet_encoder
+from src.common_utils.losses import chamfer_distance
+import src.common_utils.utils as utils
+from src.networks.pointnet2 import PointnetPP
+import src.networks.edge_propagation as edge_propagation
+
+from src.common_utils.data_utils_torch import farthest_point_sampling, batched_index_select
+import src.common_utils.model_utils as model_utils
+
+
+from src.common_utils.data_utils_torch import compute_normals_o3d, get_vals_via_nearest_neighbours
 from scipy.optimize import linear_sum_assignment
+
+
 
 class Discriminator(nn.Module): ### 
     def __init__(self):
