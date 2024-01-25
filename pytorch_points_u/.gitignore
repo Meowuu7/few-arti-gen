@@ -1,0 +1,14 @@
+tests/outputs
+exp
+data
+*.pyc
+*.so
+*.o
+*.egg
+*.egg-info/
+build
+dist
+__pycache__
+.mypy_cache/
+.vscode
+
