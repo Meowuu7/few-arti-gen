@@ -12,7 +12,7 @@ from src.common_utils.data_utils_torch import farthest_point_sampling
 
 from src.networks.pointnet_utils import pointnet_encoder, PointFlowEncoder
 from scipy.optimize import linear_sum_assignment
-
+from pytorch_points.network.geo_operations import mean_value_coordinates_3D
 
 
 class STN(nn.Module):
@@ -448,7 +448,7 @@ class MLPDeformer(nn.Module):
 
 
 
-from pytorch_points.network.geo_operations import mean_value_coordinates_3D
+
 def deform_with_MVC(cage, cage_deformed, cage_face, query, weights=None, verbose=False):
     """
     cage (B,C,3)
@@ -787,10 +787,10 @@ class NetworkFull(nn.Module):
         
         ### gt_def_new_cage ---> matching... ###
         ''' biparti mathcing for cages ''' ###
-        # gt_def_new_cage = biparti_matching_batched_torch(ori_cage.contiguous().transpose(1, 2).contiguous(), target_cvx_shp.contiguous().transpose(1, 2).contiguous())
+        gt_def_new_cage = biparti_matching_batched_torch(ori_cage.contiguous().transpose(1, 2).contiguous(), target_cvx_shp.contiguous().transpose(1, 2).contiguous())
         # # def_new_cage = def_new_cage.contiguous().transpose(1, 2).contiguous()
         # ### flow_cage_def_new_cage: bsz x n_pts x 3 ###; flow_cage_def_new_cage
-        # flow_cage_def_new_cage = gt_def_new_cage - ori_cage.contiguous().transpose(1, 2).contiguous()
+        flow_cage_def_new_cage = gt_def_new_cage - ori_cage.contiguous().transpose(1, 2).contiguous()
         
         # flow_cage_def_new_cage_cage = gt_def_new_cage - cage.contiguous().transpose(1, 2).contiguous()
         

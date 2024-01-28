@@ -54,7 +54,9 @@ The method consists of four stages:
 - **Deformation synchronization**: synchronizing convex deformations for object-level deformations. Please refer to [`doc_deformation_synchronization`](./docs/3-deformation_synchronization.md) for details. 
 - **Physics-aware correction**: deformation correction considering the physical validity of the generated articulated object. Please refer to [`doc_physics_correction`](./docs/4-physics_correction.md) for details. 
 
+
 **TODOs (More to come, stay tuned!)**
+- [ ] Pre-training process
 - [ ] Data and checkpoitns
 - [ ] More docs
 

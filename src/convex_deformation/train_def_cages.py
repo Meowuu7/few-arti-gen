@@ -1,7 +1,7 @@
 import src.datasets.datasets_def_convex as datasets_convex
 import torch
 import numpy as np
-import src.networks.network_target_driven_prob as network
+# import src.networks.network_target_driven_prob as network
 import src.networks.network_with_cages as network_paired_data
 from src.common_utils.utils import normalie_pc_bbox_batched, save_obj_file, weights_init
 import argparse
@@ -12,8 +12,8 @@ import os
 from pathlib import Path
 import datetime
 from src.common_utils.evaluation_metrics import *
-import common_utils.data_utils_torch as data_utils
-from src.networks.network import model as glb_deform_model
+import src.common_utils.data_utils_torch as data_utils
+# from src.networks.network import model as glb_deform_model
 import src.common_utils.losses as losses
 
 
@@ -90,16 +90,15 @@ def parse_args():
     parser.add_argument('--with_cat_deform', type=int, default=1,)
     parser.add_argument('--wo_keypts_abs', default=False, action='store_true',)
     parser.add_argument('--test_only', default=False, action='store_true',)
-    parser.add_argument('--use_codebook', default=False, action='store_true',) # with_recon
+    parser.add_argument('--use_codebook', default=False, action='store_true',)
     parser.add_argument('--with_recon', default=False, action='store_true',)
     parser.add_argument('--def_verts', default=False, action='store_true',)
     parser.add_argument('--lap_lambda', type=float,
                         default=0.2, )
-    parser.add_argument('--sym_lambda', type=float,
-                        default=1.0, )
+    parser.add_argument('--sym_lambda', type=float, default=1.0, )
     parser.add_argument('--use_cvx_feats', default=False, action='store_true',) #
     parser.add_argument('--use_def_pc', default=False, action='store_true',) #
-    parser.add_argument('--use_trans_range', default=False, action='store_true',) #
+    parser.add_argument('--use_trans_range', default=False, action='store_true',)
     parser.add_argument('--use_delta_prob', default=False, action='store_true',) # 
     parser.add_argument('--use_cond_vae', default=False, action='store_true',) #
     parser.add_argument('--use_cond_vae_cvx_feats', default=False, action='store_true',)
@@ -122,9 +121,9 @@ def parse_args():
     
     
     parser.add_argument('--decode_cond_pos', default=False, action='store_true',)
-    parser.add_argument('--use_recon_as_cd', default=False, action='store_true',) # cond_tar_pc
-    parser.add_argument('--cond_tar_pc', default=False, action='store_true',) # recon_cond_tar
-    parser.add_argument('--recon_cond_tar', default=False, action='store_true',)  ## recon_cond
+    parser.add_argument('--use_recon_as_cd', default=False, action='store_true',)
+    parser.add_argument('--cond_tar_pc', default=False, action='store_true',)
+    parser.add_argument('--recon_cond_tar', default=False, action='store_true',) 
     parser.add_argument('--recon_cond', type=str,
                         default='cvx', ) 
     parser.add_argument('--cvx_dim', type=int, default=-1,) 
@@ -154,12 +153,12 @@ def parse_args():
     parser.add_argument("--use_gt_cages", action="store_true",) 
     parser.add_argument("--bais_per_vert", action="store_true", ) 
     parser.add_argument("--optimize_coef", action="store_true", )  
-    parser.add_argument('--cd_weight', type=float,
-                        default=1.0, )
+    parser.add_argument('--cd_weight', type=float, default=1.0, )
     parser.add_argument("--optimize_basis", action="store_true", ) 
 
 
     parser.add_argument('--rnd_sample_nn', type=int, default=0, ) 
+    parser.add_argument('--src_index', type=int, default=-1, ) 
     parser.add_argument("--cvx_folder_fn", type=str, default="")
     parser.add_argument("--glb_template", type=str, default="") 
     parser.add_argument("--gen_pts_path", type=str, default="") 
@@ -198,14 +197,6 @@ experiment_dir.mkdir(exist_ok=True)
 
 log_dir = experiment_dir.joinpath('logs/')
 log_dir.mkdir(exist_ok=True)
-if opt.log_dir is None:
-    shutil.copy('src/datasets_target_driven.py', str(experiment_dir))
-    shutil.copy('src/losses.py', str(experiment_dir))
-    shutil.copy('src/network.py', str(experiment_dir))
-    shutil.copy('src/pointnet_utils.py', str(experiment_dir))
-    shutil.copy('src/train_target_driven.py', str(experiment_dir))
-    shutil.copy('src/utils.py', str(experiment_dir))
-    shutil.copy('src/laplacian.py', str(experiment_dir))
 
 
 
@@ -227,18 +218,16 @@ log_string(opt)
 
 
 ##### add exp_flag to the samples dir's name #####
-use_prob_indicator = 1 if opt.use_prob else 0
-use_prob_src_indicator = 1 if opt.use_prob_src else 0
+# use_prob_indicator = 1 if opt.use_prob else 0
+# use_prob_src_indicator = 1 if opt.use_prob_src else 0
 
-
-
-model_flag = f"{opt.exp_flag}_{opt.learning_rate}_kl_{opt.kl_weight}_use_prob_{use_prob_indicator}_src_prob_{use_prob_src_indicator}_scaling_{opt.random_scaling}_tar_basis_{opt.tar_basis}_num_basis_{opt.num_basis}_n_keypoints_{opt.n_keypoints}_neighbouring_k_{opt.neighbouring_k}"
+model_flag = f"{opt.exp_flag}_{opt.learning_rate}_kl_{opt.kl_weight}_scaling_{opt.random_scaling}_tar_basis_{opt.tar_basis}_num_basis_{opt.num_basis}_n_keypoints_{opt.n_keypoints}_neighbouring_k_{opt.neighbouring_k}"
 
 
 samples_dir = model_flag
 samples_root_dir = "./samples"
-samples_root_dir = os.path.join(samples_root_dir, "few_arti_gen")
-os.makedirs(samples_root_dir, exist_ok=True)
+# samples_root_dir = os.path.join(samples_root_dir, "few_arti_gen")
+# os.makedirs(samples_root_dir, exist_ok=True)
 samples_dir = os.path.join(samples_root_dir, samples_dir)
 os.makedirs(samples_dir, exist_ok=True)
 
@@ -246,6 +235,7 @@ os.makedirs(samples_dir, exist_ok=True)
 
 checkpoints_dir = "./ckpts"
 checkpoints_dir = os.path.join(checkpoints_dir, "few_arti_gen")
+log_string(f"Checkpoint dir: {checkpoints_dir}")
 os.makedirs(checkpoints_dir, exist_ok=True)
 
 
@@ -274,16 +264,16 @@ net = network_paired_data.model(opt.num_basis, opt=opt).cuda()
 
 
 
-image_render = network_paired_data.ImageRender()
+# image_render = network_paired_data.ImageRender()
 
 
 
 
 
-if opt.with_glb: ### 
-    glb_net = glb_deform_model(opt.num_basis, opt=opt).cuda()
-else:
-    glb_net = None
+# if opt.with_glb:
+#     glb_net = glb_deform_model(opt.num_basis, opt=opt).cuda()
+# else:
+#     glb_net = None
 
 
 
@@ -300,12 +290,12 @@ def safe_load_ckpt_common(model, state_dicts, weight_flag=None):
             tot_params_n += 1
     model_dict.update(part_dict)
     model.load_state_dict(model_dict)
-    print(f"Resumed with {tot_params_n} parameters...")
+    log_string(f"Resumed with {tot_params_n} parameters.")
 
 
 
     
-log_string('No existing model, starting training from scratch...')
+# log_string('No existing model, starting training from scratch...')
 start_epoch = 0
 cd_curve = []
 sym_curve = []
@@ -324,10 +314,10 @@ if len(opt.net_path) > 0:
     safe_load_ckpt_common(net, net_state_dict) ### laod net path ###
     
 
-if len(opt.net_glb_path) > 0:
-    net_state_dict = torch.load(opt.net_glb_path, map_location="cpu", )
-    # safe_load_ckpt_common(net, net_state_dict, weight_flag=weight_flag)
-    safe_load_ckpt_common(glb_net, net_state_dict) ### laod net path ###
+# if len(opt.net_glb_path) > 0:
+#     net_state_dict = torch.load(opt.net_glb_path, map_location="cpu", )
+#     # safe_load_ckpt_common(net, net_state_dict, weight_flag=weight_flag)
+#     safe_load_ckpt_common(glb_net, net_state_dict) ### laod net path ###
 
 
 
@@ -345,7 +335,7 @@ if opt.test_only:
     opt.epoch = start_epoch + 1
 
 
-glb_net = None
+# glb_net = None
 
 
 
@@ -353,11 +343,11 @@ sampled_pts = []
 
 
 
-if glb_net is not None:
-    glb_net.train()
-    net.train()
-else:
-    net.train()
+# if glb_net is not None:
+#     glb_net.train()
+#     net.train()
+# else:
+net.train()
 
 
 
@@ -395,7 +385,7 @@ for epoch in range(start_epoch, opt.epoch):
         real_pc = data["real_pc"]
         real_vertices = data["real_vertices"]
         real_w_mesh = data["real_w_mesh"]
-        real_cvx_to_pts = data["real_cvx_to_pts"] ### real_cvx_to_pts and others ###
+        real_cvx_to_pts = data["real_cvx_to_pts"]
         
         ### forward
         mesh_rt_dict = net.forward7(src_verts[0].unsqueeze(0), tar_verts[0].unsqueeze(0), key_pts, dst_key_pts, w_pc,  src_verts,src_cvx_to_pts , tar_verts, dst_cvx_to_pts)
@@ -435,9 +425,13 @@ for epoch in range(start_epoch, opt.epoch):
         buf["sp"].append(tot_sp_loss.detach().cpu().numpy())
         buf["svd"].append(tot_svd_loss.detach().cpu().numpy())
         
+        
+        
         optimizer.zero_grad()
         tot_loss.backward()
         optimizer.step()
+
+
 
 
         if epoch % opt.display == 0:
@@ -469,21 +463,21 @@ for epoch in range(start_epoch, opt.epoch):
         
                 cur_bsz_src_verts = src_verts[i_bsz].detach().cpu().numpy()
                 cur_bsz_src_face = src_faces[i_bsz].detach().cpu().numpy().tolist()
-                cur_bsz_src_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_src_mesh.obj")
+                cur_bsz_src_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_src_mesh.obj")
                 save_obj_file(cur_bsz_src_verts, cur_bsz_src_face, cur_bsz_src_mesh_sv_fn, add_one=True)
                 
                 cur_bsz_tar_verts = tar_verts[i_bsz].detach().cpu().numpy()
                 cur_bsz_tar_face = tar_faces[i_bsz].detach().cpu().numpy().tolist()
-                cur_bsz_tar_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_tar_mesh.obj")
+                cur_bsz_tar_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_tar_mesh.obj")
                 save_obj_file(cur_bsz_tar_verts, cur_bsz_tar_face, cur_bsz_tar_mesh_sv_fn, add_one=True)
                 
                 def_verts = mesh_rt_dict["deformed"]
-                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_def_mesh.obj")
+                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_def_mesh.obj")
                 save_obj_file(def_verts.detach().cpu().numpy()[i_bsz], src_faces[0].detach().cpu().numpy().tolist(), def_mesh_sv_fn, add_one=True)
                 
                 
                 merged_def_verts = mesh_rt_dict["merged_deformed"]
-                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_merged_def_mesh.obj")
+                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_merged_def_mesh.obj")
                 save_obj_file(merged_def_verts.detach().cpu().numpy()[i_bsz], src_faces[0].detach().cpu().numpy().tolist(), def_mesh_sv_fn, add_one=True)
                 
                 
@@ -493,10 +487,10 @@ for epoch in range(start_epoch, opt.epoch):
                 s_sampled_pts = data_utils.sample_pts_from_mesh(s_verts, s_faces, npoints=mesh_sample_npoints, minus_one=False)
                 s_sampled_pts = data_utils.fps_fr_numpy(s_sampled_pts, n_sampling=nn_com_pts)
                 sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                # cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
+                
                 
                 pure_merged_def_verts = mesh_rt_dict["pure_merged_deformed"]
-                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_i_s_{i_sample}_src_merged_def_mesh.obj")
+                def_mesh_sv_fn = os.path.join(samples_dir, f"train_ep_{epoch}_iter_{i}_bsz_{i_bsz}_src_merged_def_mesh.obj")
                 save_obj_file(pure_merged_def_verts.detach().cpu().numpy()[i_bsz], src_faces[0].detach().cpu().numpy().tolist(), def_mesh_sv_fn, add_one=True)
                 
                 s_verts = pure_merged_def_verts.detach().cpu().numpy()[i_bsz]
@@ -505,10 +499,10 @@ for epoch in range(start_epoch, opt.epoch):
                 s_sampled_pts = data_utils.sample_pts_from_mesh(s_verts, s_faces, npoints=mesh_sample_npoints, minus_one=False)
                 s_sampled_pts = data_utils.fps_fr_numpy(s_sampled_pts, n_sampling=nn_com_pts)
                 sampled_pts.append(s_sampled_pts.unsqueeze(0))
-                # cur_iter_sampled_pts.append(s_sampled_pts.unsqueeze(0))
+                
                 
 
-            print(f"Svaing to : {def_mesh_sv_fn}")
+            log_string(f"[def_mesh_sv_fn]: {def_mesh_sv_fn}")
 
             #### log all losses ####
             log_string(" tot %f, cd %f, orth %f, svd %f, sp %f" %
@@ -525,7 +519,7 @@ for epoch in range(start_epoch, opt.epoch):
         net_params = net.state_dict()
         torch.save(net_params, net_sv_fn)
         
-        print(f"Saveing net's parameters to {net_sv_fn}...")
+        log_string(f"Saveing net's parameters to {net_sv_fn}...")
         
     ###### save network model at the last epoch #####
     last_ep_net_sv_fn = os.path.join(ckpt_dir, f"net_last_model.pth")

@@ -5,7 +5,7 @@ from torch_batch_svd import svd
 # from pytorch3d.ops.knn import knn_gather, knn_points
 # from pytorch3d.structures.pointclouds import Pointclouds
 
-from laplacian import mesh_laplacian
+from src.common_utils.laplacian import mesh_laplacian
 
 # import pytorch3d
 

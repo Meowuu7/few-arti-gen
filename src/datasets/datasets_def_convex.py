@@ -3,8 +3,8 @@ import torch
 import numpy as np
 import os
 import random
-import utils
-from common_utils import dataset_utils
+import src.common_utils.utils as utils
+import  src.common_utils.dataset_utils as dataset_utils
 
 
 def my_collate(batch):
@@ -105,7 +105,7 @@ def my_collate(batch):
             "src_cvx_idx_list": src_cvx_idx_list, "dst_cvx_idx_list": dst_cvx_idx_list
             }
 
-### dataset def 
+### ConvexDataset
 class ConvexDataset(torch.utils.data.Dataset):
     def __init__(self, phase="train", data_dir="../data/chair", split=None, opt=None, cvx_to_pts_sufix=None, n_keypoints=None, src_folder_fn=None, dst_folder_fn=None):
         super().__init__()
@@ -177,11 +177,10 @@ class ConvexDataset(torch.utils.data.Dataset):
         print(f"src_data_dir: {self.src_data_dir}, src_folder: {src_folder}")
         print(f"dst_data_dir: {self.dst_data_dir}, dst_folder: {dst_folder}")
         
-        self.src_folder = src_folder ## src_folder --> 
+        self.src_folder = src_folder
         self.dst_folder = dst_folder
         
         
-        # /data/datasets/genn/ShapeNetCoreV2_Deform/03636649_c_512/dst_def/1a9c1cbf1ca9ca24274623f5a5d0bcdc_manifold_tetra.mesh__sf.keypoints_256.weights.txt
         self.keypts_sufix = f"_manifold_tetra.mesh__sf.keypoints_{self.n_keypoints}.weights.sampled_4096.txt"
         
         ''' src_models ''' 
@@ -221,7 +220,6 @@ class ConvexDataset(torch.utils.data.Dataset):
         
         
         ### surface points, mesh points, cvx points 
-        
         print(f"current dst_models: {len(self.dst_models)}, cur src_models: {len(self.src_models)}")
         
         self.n_shots = self.opt.n_shots
@@ -238,10 +236,6 @@ class ConvexDataset(torch.utils.data.Dataset):
         
         print(f"Meta-infos loaded with src_models: {len(self.src_models)}, dst_models: {len(self.dst_models)}")
         
-        # self.valid_models = {model_fn: 1 for model_fn in self.src_models if model_fn in self.dst_models}
-        
-        # self.src_models = [model_fn for model_fn in self.src_models if model_fn in self.valid_models]
-        # self.dst_models = [model_fn for model_fn in self.dst_models if model_fn in self.valid_models]
         
         if opt.debug:
           self.src_models = self.src_models[:2]
@@ -290,24 +284,23 @@ class ConvexDataset(torch.utils.data.Dataset):
         cvx_to_pts_sufix = f'_cvx_to_verts_cdim_{self.cvx_dim}.npy'
         cvx_to_pts_sufix = "_cvx_to_verts.npy"
         cvx_to_pts_sufix = self.cvx_to_pts_sufix
-        cvx_to_pts_sufix = cur_cvx_to_pts_sufix ## for current cvx_to_pts_sufix ### 
+        cvx_to_pts_sufix = cur_cvx_to_pts_sufix
+        
+        
         if self.cvx_dim > 0:
           cur_cvx_to_verts_fn = cur_model + cvx_to_pts_sufix
         else:
           cur_cvx_to_verts_fn = cur_model + cvx_to_pts_sufix
           
-        
-        
         # print(f"loading from {os.path.join(rt_folder, cur_cvx_to_verts_fn)}")
         cur_keypoints, _ =  utils.read_obj_file_ours(os.path.join(rt_folder, cur_keypoints_fn))
         cur_sampled, _ = utils.read_obj_file_ours(os.path.join(rt_folder, cur_sampled_pts_fn))
         cur_surface, cur_faces = utils.read_obj_file_ours(os.path.join(rt_folder, cur_surface_pts_fn), sub_one=True)
         cur_weights_sampled_keypoints = utils.load_txt(os.path.join(rt_folder, cur_weights_sampled_fn))
         cur_weights_mesh_keypoints = utils.load_txt(os.path.join(rt_folder, cur_weights_tot_fn))
-        cur_faces = np.array(cur_faces, dtype=np.long) # .long()
+        cur_faces = np.array(cur_faces, dtype=np.long)
         
         
-        # cur_data_dir; self.cvx_folder_fn, cvx_to_verts_fn #### ---> cvx_to_verts_fns ####
         cvx_to_pts_load_fn = os.path.join(os.path.join(cur_data_dir, self.cvx_folder_fn), cur_cvx_to_verts_fn)
         
         
@@ -318,7 +311,6 @@ class ConvexDataset(torch.utils.data.Dataset):
             0: cur_scaled_sampled
           }
         else:
-          # cvx_to_pts = np.load(os.path.join(rt_folder, cur_cvx_to_verts_fn),allow_pickle=True).item()
           cvx_to_pts = np.load(cvx_to_pts_load_fn, allow_pickle=True).item()
         
         return cur_sampled, cur_keypoints, cur_surface, cur_faces, cur_weights_sampled_keypoints, cur_weights_mesh_keypoints, cvx_to_pts
@@ -360,10 +352,7 @@ class ConvexDataset(torch.utils.data.Dataset):
     
     def __len__(self):
         return self.src_n_models
-        # return self.dst_n_models
-        # return self.src_n_models * self.dst_n_models
-        
-
+    
     
     def apply_random_scaling(self, vertices, pc, keypoints, dst_cvx_to_pts_list):
         scale_normalizing_factors = np.random.uniform(low=0.75, high=1.25, size=(3,))
@@ -456,22 +445,18 @@ class ConvexDataset(torch.utils.data.Dataset):
         
         ori_idx = idx ### 
         #### randomly choose index for src_model and dst_model ####
-        idx = random.choice(range(self.src_n_models * self.dst_n_models)) ## dst_n_models
-        # ori_idx = idx // self.dst_n_models
-        
-        ## dst_n_models --> 
+        idx = random.choice(range(self.src_n_models * self.dst_n_models))
+
         real_idx = random.choice(range(self.dst_n_models))
         
         
-        # src_idx = idx // self.dst_n_models
         if self.one_shp:
           src_idx = 0
         else:
-          src_idx = ori_idx ### src_idx ###
+          src_idx = ori_idx
           
         if self.src_index >= 0:
           src_idx = self.src_index
-        # dst_idx = idx % self.dst_n_models
         
         if dst_idx is None:
           if self.small_tar_nn:
@@ -479,13 +464,12 @@ class ConvexDataset(torch.utils.data.Dataset):
           else: ### idx %
             dst_idx = idx % self.dst_n_models
             
-        forbit_idxes = [17, 14, 26, 25, 15, 18, 21, 35, 14, 31, 34, 19, 29, 11]
-        if src_idx in forbit_idxes:
-          src_idx = 0
+        # forbit_idxes = [17, 14, 26, 25, 15, 18, 21, 35, 14, 31, 34, 19, 29, 11]
+        # if src_idx in forbit_idxes:
+        #   src_idx = 0
 
-        if dst_idx in forbit_idxes:
-          dst_idx = 0
-
+        # if dst_idx in forbit_idxes:
+        #   dst_idx = 0
         # src_idx = 29
         
         print(f"src_idx: {src_idx}, dst_idx: {dst_idx}, src_models: { self.src_models[src_idx]}, dst_models: {self.dst_models[dst_idx]}")
@@ -534,20 +518,17 @@ class ConvexDataset(torch.utils.data.Dataset):
 
         src_pc, src_key_pts, src_vertices, src_faces, src_w_pc, src_w_mesh, src_cvx_to_pts = \
           get_info_via_idx(src_idx, for_src=True) 
-          # self.src_pc[src_idx], self.src_key_pts[src_idx], self.src_mesh_vertices[src_idx], self.src_mesh_faces[src_idx], self.src_w_pc[src_idx], self.src_w_mesh[src_idx], self.src_cvx_to_pts[src_idx]
-        
+
+
         ### numpy arrays ###
         tar_pc, dst_key_pts, dst_vertices, dst_faces, dst_w_pc, dst_w_mesh, dst_cvx_to_pts = \
-          get_info_via_idx(dst_idx) ## va idx
-          # self.dst_pc[dst_idx], self.dst_key_pts[dst_idx], self.dst_mesh_vertices[dst_idx], self.dst_mesh_faces[dst_idx], self.dst_w_pc[dst_idx], self.dst_w_mesh[dst_idx], self.dst_cvx_to_pts[dst_idx]
-        
+          get_info_via_idx(dst_idx) 
+          
+          
         real_pc, real_key_pts, real_vertices, real_faces, real_w_pc, real_w_mesh, real_cvx_to_pts = \
           get_info_via_idx(real_idx)
-          # self.dst_pc[real_idx], self.dst_key_pts[real_idx], self.dst_mesh_vertices[real_idx], self.dst_mesh_faces[real_idx], self.dst_w_pc[real_idx], self.dst_w_mesh[real_idx], self.dst_cvx_to_pts[real_idx]
-        
-        # src_edges, src_dofs = dataset_utils.get_edges_from_faces(src_vertices, src_faces)
-        # tar_edges, tar_dofs = dataset_utils.get_edges_from_faces(dst_vertices, dst_faces)
-        
+          
+          
         src_cvx_to_pts_list, dst_cvx_to_pts_list, tot_src_cvx_idx_list, tot_dst_cvx_idx_list = self.get_src_dst_cvx_to_pts(src_cvx_to_pts, dst_cvx_to_pts, src_pc, tar_pc, cvx_list_filter=self.cvx_list_filter)
         
         # dict_to_list(self, cvx_to_pts_dict, cur_pc)
