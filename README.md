@@ -36,6 +36,8 @@
 
 https://github.com/Meowuu7/few-arti-gen/assets/50799886/96ec73a6-af99-4d0c-9365-c48d184fc33c
 
+**[2024.10] Repository Status: Not Actively Maintained** -- Thank you for stopping by. Due to limited time, this repository is currently not being maintained. I am sorry that I have been unable to complete the remaining TODOs as planned and currently have no plans to revisit, organize, and release the unfinished parts. Sharing fuzzy code privately would also make me uncomfortable. I sincerely apologize for any inconvenience this may cause and appreciate your understanding.
+
 ## Enviroment
 
 ```bash
